@@ -139,11 +139,11 @@
 
     <main class="max-w-[1550px] mx-auto p-4 md:p-6">
 
-        <!-- TAB 1: FORMULÁRIO DE O.S. + PREVIEW EM TEMPO REAL (AGORA COM LARGURAS IGUAIS EM GRID) -->
+        <!-- TAB 1: FORMULÁRIO DE O.S. + PREVIEW EM TEMPO REAL -->
         <section id="tab-nova-os" class="tab-content">
             <div class="grid grid-cols-1 lg:grid-cols-2 items-start gap-8 w-full">
                 
-                <!-- Formulário de Preenchimento (Mesma largura do Preview) -->
+                <!-- Formulário de Preenchimento -->
                 <div class="w-full bg-white app-card-dark p-6 rounded-2xl shadow-sm border border-slate-200 no-print space-y-6">
                     <div class="flex justify-between items-center border-b pb-3">
                         <h2 class="text-lg font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
@@ -293,7 +293,7 @@
                     </div>
                 </div>
 
-                <!-- PREVIEW DO PDF DA O.S. (Largura idêntica via Grid) -->
+                <!-- PREVIEW DO PDF DA O.S. -->
                 <div class="w-full flex justify-center items-start">
                     
                     <div id="os-document-preview" class="os-container-print rounded-xl shadow-2xl overflow-hidden w-full border border-slate-200 relative min-h-[900px] flex flex-col justify-between">
@@ -486,92 +486,121 @@
         <!-- TAB 3: CRUD DE CLIENTES -->
         <section id="tab-clientes" class="tab-content hidden">
             <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
-                <div class="md:col-span-5 bg-white app-card-dark p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
-                    <h2 class="text-lg font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2" id="cliente-form-title">
-                        <i class="fa-solid fa-user-plus text-red-600"></i> Cadastro de Cliente
-                    </h2>
-                    <input type="hidden" id="cliente-id">
-                    
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Nome Completo / Razão Social *</label>
-                        <input type="text" id="crud-cliente-nome" placeholder="Ex: Nome do Cliente" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm">
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">CPF / CNPJ</label>
-                            <input type="text" id="crud-cliente-doc" placeholder="00.000.000/0001-00" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Telefone / WhatsApp</label>
-                            <input type="text" id="crud-cliente-telefone" placeholder="(11) 99999-8888" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm">
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">E-mail / Contato</label>
-                        <input type="text" id="crud-cliente-contato" placeholder="email@outlook.com" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm">
-                    </div>
-
-                    <div class="pt-2 border-t dark:border-slate-700 space-y-3">
-                        <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Endereço do Cliente</span>
+                <!-- COLUNA ESQUERDA: Form de Cadastro + Card de Detalhes Visual do Cliente (NÚMERO 2) -->
+                <div class="md:col-span-5 space-y-6">
+                    <div class="bg-white app-card-dark p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
+                        <h2 class="text-lg font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2" id="cliente-form-title">
+                            <i class="fa-solid fa-user-plus text-red-600"></i> Cadastro de Cliente
+                        </h2>
+                        <input type="hidden" id="cliente-id">
                         
-                        <div class="grid grid-cols-3 gap-2">
-                            <div class="col-span-1">
-                                <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">CEP</label>
-                                <input type="text" id="crud-cliente-cep" placeholder="00000-000" onkeyup="buscarCEP(this.value)" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm font-semibold text-red-600">
-                            </div>
-                            <div class="col-span-2 flex items-end">
-                                <span id="cep-loading" class="text-xs text-slate-500 hidden"><i class="fa-solid fa-spinner fa-spin text-red-600 mr-1"></i> Buscando...</span>
-                            </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Nome Completo / Razão Social *</label>
+                            <input type="text" id="crud-cliente-nome" placeholder="Ex: Nome do Cliente" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm">
                         </div>
 
-                        <div class="grid grid-cols-12 gap-2">
-                            <div class="col-span-8">
-                                <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Endereço (Logradouro)</label>
-                                <input type="text" id="crud-cliente-endereco" placeholder="Logradouro..." class="w-full bg-slate-100 border border-slate-300 rounded-lg p-2 text-sm">
-                            </div>
-                            <div class="col-span-4">
-                                <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Número</label>
-                                <input type="text" id="crud-cliente-numero" placeholder="Nº" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm">
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-2">
+                        <div class="grid grid-cols-2 gap-3">
                             <div>
-                                <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Complemento</label>
-                                <input type="text" id="crud-cliente-complemento" placeholder="Sala / Bloco" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm">
+                                <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">CPF / CNPJ</label>
+                                <input type="text" id="crud-cliente-doc" placeholder="00.000.000/0001-00" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm">
                             </div>
                             <div>
-                                <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Bairro</label>
-                                <input type="text" id="crud-cliente-bairro" placeholder="Bairro" class="w-full bg-slate-100 border border-slate-300 rounded-lg p-2 text-sm">
+                                <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Telefone / WhatsApp</label>
+                                <input type="text" id="crud-cliente-telefone" placeholder="(11) 99999-8888" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm">
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-12 gap-2">
-                            <div class="col-span-8">
-                                <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Cidade</label>
-                                <input type="text" id="crud-cliente-cidade" placeholder="Cidade" class="w-full bg-slate-100 border border-slate-300 rounded-lg p-2 text-sm">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">E-mail / Contato</label>
+                            <input type="text" id="crud-cliente-contato" placeholder="email@outlook.com" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm">
+                        </div>
+
+                        <div class="pt-2 border-t dark:border-slate-700 space-y-3">
+                            <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Endereço do Cliente</span>
+                            
+                            <div class="grid grid-cols-3 gap-2">
+                                <div class="col-span-1">
+                                    <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">CEP</label>
+                                    <input type="text" id="crud-cliente-cep" placeholder="00000-000" onkeyup="buscarCEP(this.value)" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm font-semibold text-red-600">
+                                </div>
+                                <div class="col-span-2 flex items-end">
+                                    <span id="cep-loading" class="text-xs text-slate-500 hidden"><i class="fa-solid fa-spinner fa-spin text-red-600 mr-1"></i> Buscando...</span>
+                                </div>
                             </div>
-                            <div class="col-span-4">
-                                <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Estado (UF)</label>
-                                <input type="text" id="crud-cliente-estado" placeholder="UF" class="w-full bg-slate-100 border border-slate-300 rounded-lg p-2 text-sm text-center uppercase font-bold">
+
+                            <div class="grid grid-cols-12 gap-2">
+                                <div class="col-span-8">
+                                    <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Endereço (Logradouro)</label>
+                                    <input type="text" id="crud-cliente-endereco" placeholder="Logradouro..." class="w-full bg-slate-100 border border-slate-300 rounded-lg p-2 text-sm">
+                                </div>
+                                <div class="col-span-4">
+                                    <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Número</label>
+                                    <input type="text" id="crud-cliente-numero" placeholder="Nº" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm">
+                                </div>
                             </div>
+
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Complemento</label>
+                                    <input type="text" id="crud-cliente-complemento" placeholder="Sala / Bloco" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Bairro</label>
+                                    <input type="text" id="crud-cliente-bairro" placeholder="Bairro" class="w-full bg-slate-100 border border-slate-300 rounded-lg p-2 text-sm">
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-12 gap-2">
+                                <div class="col-span-8">
+                                    <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Cidade</label>
+                                    <input type="text" id="crud-cliente-cidade" placeholder="Cidade" class="w-full bg-slate-100 border border-slate-300 rounded-lg p-2 text-sm">
+                                </div>
+                                <div class="col-span-4">
+                                    <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Estado (UF)</label>
+                                    <input type="text" id="crud-cliente-estado" placeholder="UF" class="w-full bg-slate-100 border border-slate-300 rounded-lg p-2 text-sm text-center uppercase font-bold">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-2 pt-3 border-t dark:border-slate-700">
+                            <button onclick="salvarCliente()" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-lg text-sm shadow">
+                                Salvar Cliente
+                            </button>
+                            <button onclick="limparFormCliente()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold px-3 py-2.5 rounded-lg text-sm">
+                                Cancelar
+                            </button>
                         </div>
                     </div>
 
-                    <div class="flex gap-2 pt-3 border-t dark:border-slate-700">
-                        <button onclick="salvarCliente()" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-lg text-sm shadow">
-                            Salvar Cliente
-                        </button>
-                        <button onclick="limparFormCliente()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold px-3 py-2.5 rounded-lg text-sm">
-                            Cancelar
-                        </button>
+                    <!-- CARD DE DETALHES DO CLIENTE SELECIONADO (MARCADO COM O NÚMERO 2) -->
+                    <div id="card-detalhes-cliente" class="bg-white app-card-dark p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
+                        <div class="flex justify-between items-center border-b border-slate-200 dark:border-slate-700 pb-3">
+                            <h3 class="text-sm font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                                <i class="fa-solid fa-address-card text-red-600"></i> Detalhes do Cliente Selecionado
+                            </h3>
+                            <span class="text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 font-semibold px-2 py-0.5 rounded uppercase">Visualização</span>
+                        </div>
+                        
+                        <div id="conteudo-detalhes-cliente" class="text-xs text-slate-500 dark:text-slate-400 italic text-center py-6">
+                            Clique no nome de um cliente na tabela ao lado para visualizar os dados completos dele aqui.
+                        </div>
                     </div>
                 </div>
 
+                <!-- COLUNA DIREITA: Tabela de Clientes + BARRA DE BUSCA (MARCADA EM VERMELHO NA PARTE SUPERIOR) -->
                 <div class="md:col-span-7 bg-white app-card-dark p-6 rounded-2xl shadow-sm border border-slate-200">
-                    <h2 class="text-lg font-bold text-slate-800 dark:text-slate-100 mb-4">Base de Clientes Cadastrados</h2>
+                    <div class="flex flex-wrap justify-between items-center gap-3 mb-4">
+                        <h2 class="text-lg font-bold text-slate-800 dark:text-slate-100">Base de Clientes Cadastrados</h2>
+                        
+                        <!-- CAMPO DE BUSCA DE CLIENTES (MARCADO EM VERMELHO NO TOPO DIREITO) -->
+                        <div class="relative w-full sm:w-64">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
+                                <i class="fa-solid fa-magnifying-glass text-xs"></i>
+                            </span>
+                            <input type="text" id="search-cliente" placeholder="Buscar por cliente, documento ou e-mail..." onkeyup="filtrarClientesTabela()" class="w-full bg-slate-50 border border-slate-300 rounded-lg pl-9 pr-3 py-2 text-xs focus:ring-2 focus:ring-red-500 focus:outline-none">
+                        </div>
+                    </div>
+
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-sm border-collapse">
                             <thead>
@@ -631,7 +660,7 @@
                     </button>
                 </div>
 
-                <!-- Bloco de Backup e Segurança contra Limpeza de Cache -->
+                <!-- Bloco de Backup e Segurança -->
                 <div class="bg-slate-900 text-white p-6 rounded-2xl shadow border border-slate-800 space-y-4">
                     <div class="flex items-center gap-2 border-b border-slate-800 pb-3">
                         <i class="fa-solid fa-shield-halved text-amber-400 text-lg"></i>
@@ -646,12 +675,10 @@
                     </p>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2">
-                        <!-- Botão Exportar Backup -->
                         <button onclick="fazerBackupOS()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-4 rounded-xl shadow transition flex items-center justify-center gap-2 text-sm">
                             <i class="fa-solid fa-download"></i> Baixar Backup (.json)
                         </button>
 
-                        <!-- Botão Restaurar Backup -->
                         <label class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-xl shadow transition flex items-center justify-center gap-2 text-sm cursor-pointer">
                             <i class="fa-solid fa-upload"></i> Restaurar Backup
                             <input type="file" id="input-restore" accept=".json" onchange="restaurarBackupOS(event)" class="hidden">
@@ -678,7 +705,7 @@
                 </div>
             </div>
 
-            <!-- DOCUMENTO IMPRESSÍVEL (ESTILO IDÊNTICO À O.S.) -->
+            <!-- DOCUMENTO IMPRESSÍVEL -->
             <div class="p-6 flex justify-center">
                 <div id="conteudo-relatorio-pdf" class="os-container-print rounded-xl shadow border border-slate-200 overflow-hidden relative min-h-[800px] w-full max-w-[750px] flex flex-col justify-between">
                     <div>
@@ -716,7 +743,6 @@
                                 </div>
                             </div>
 
-                            <!-- TABELA DE O.S. EM ABERTO (MÊS ATUAL + ANTERIORES) -->
                             <div>
                                 <h3 class="text-xs font-bold text-slate-400 tracking-wider uppercase mb-2">ORDENS DE SERVIÇO PENDENTES (ABERTAS)</h3>
                                 <div class="os-card p-0 overflow-hidden">
@@ -818,7 +844,7 @@
             atualizarPreview();
         };
 
-        // FUNÇÃO DE MODO ESCURO (DARK MODE)
+        // MODO ESCURO (DARK MODE)
         function toggleDarkMode() {
             const html = document.documentElement;
             const icon = document.getElementById('darkModeIcon');
@@ -869,7 +895,7 @@
             document.getElementById('tab-' + tabId).classList.remove('hidden');
         }
 
-        // BUSCA AUTOMÁTICA DE CEP (ViaCEP API Nacional)
+        // BUSCA AUTOMÁTICA DE CEP
         function buscarCEP(cepRaw) {
             const cep = cepRaw.replace(/\D/g, '');
             if (cep.length === 8) {
@@ -895,7 +921,7 @@
             }
         }
 
-        // FUNÇÃO DE GERAR DATA E HORA LOCAL ATUALIZADA
+        // DATA E HORA
         function obterDataHoraAtual() {
             const agora = new Date();
             const dia = agora.getDate();
@@ -1382,6 +1408,81 @@
             }
         }
 
+        // --- FILTRO EM TEMPO REAL DA TABELA DE CLIENTES (MARCADO EM VERMELHO NO TOPO DIREITO) ---
+        function filtrarClientesTabela() {
+            const q = document.getElementById('search-cliente').value.toLowerCase();
+            const rows = document.querySelectorAll('#tabela-clientes tr');
+
+            rows.forEach(r => {
+                const text = r.innerText.toLowerCase();
+                if (text.includes(q)) {
+                    r.style.display = '';
+                } else {
+                    r.style.display = 'none';
+                }
+            });
+        }
+
+        // --- VISUALIZAR DETALHES DO CLIENTE NO CARD ESQUERDO (MARCADO COM NÚMERO 2) ---
+        function visualizarClienteCard(id) {
+            const c = db.clientes.find(item => item.id == id);
+            if (!c) return;
+
+            const container = document.getElementById('conteudo-detalhes-cliente');
+            const endCompleto = [
+                c.endereco ? c.endereco : '',
+                c.numero ? 'Nº ' + c.numero : '',
+                c.complemento ? '(' + c.complemento + ')' : '',
+                c.bairro ? 'Bairro: ' + c.bairro : '',
+                c.cidade ? c.cidade : '',
+                c.estado ? c.estado : '',
+                c.cep ? 'CEP: ' + c.cep : ''
+            ].filter(Boolean).join(', ');
+
+            container.innerHTML = `
+                <div class="space-y-3 italic-none text-left">
+                    <div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-lg border border-slate-200 dark:border-slate-700">
+                        <span class="text-[10px] uppercase font-bold text-slate-400 block">NOME / RAZÃO SOCIAL</span>
+                        <span class="text-sm font-extrabold text-slate-800 dark:text-slate-100">${c.nome}</span>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2">
+                        <div class="bg-slate-50 dark:bg-slate-900/50 p-2.5 rounded-lg border border-slate-200 dark:border-slate-700">
+                            <span class="text-[10px] uppercase font-bold text-slate-400 block">CPF / CNPJ</span>
+                            <span class="text-xs font-semibold text-slate-700 dark:text-slate-300">${c.doc || 'Não informado'}</span>
+                        </div>
+                        <div class="bg-slate-50 dark:bg-slate-900/50 p-2.5 rounded-lg border border-slate-200 dark:border-slate-700">
+                            <span class="text-[10px] uppercase font-bold text-slate-400 block">TELEFONE / WHATSAPP</span>
+                            <span class="text-xs font-semibold text-slate-700 dark:text-slate-300">${c.telefone || 'Não informado'}</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-50 dark:bg-slate-900/50 p-2.5 rounded-lg border border-slate-200 dark:border-slate-700">
+                        <span class="text-[10px] uppercase font-bold text-slate-400 block">E-MAIL / CONTATO</span>
+                        <span class="text-xs font-semibold text-slate-700 dark:text-slate-300">${c.contato || 'Não informado'}</span>
+                    </div>
+
+                    <div class="bg-slate-50 dark:bg-slate-900/50 p-2.5 rounded-lg border border-slate-200 dark:border-slate-700">
+                        <span class="text-[10px] uppercase font-bold text-slate-400 block">ENDEREÇO COMPLETO</span>
+                        <span class="text-xs font-semibold text-slate-700 dark:text-slate-300">${endCompleto || 'Endereço não informado'}</span>
+                    </div>
+
+                    <button onclick="usarClienteParaOS(${c.id})" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-2 rounded-lg text-xs shadow transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-plus-circle text-red-500"></i> Usar este cliente numa Nova O.S.
+                    </button>
+                </div>
+            `;
+        }
+
+        function usarClienteParaOS(id) {
+            const c = db.clientes.find(item => item.id == id);
+            if (c) {
+                document.getElementById('form-select-cliente').value = c.id;
+                carregarClienteSelecionado();
+                switchTab('nova-os');
+            }
+        }
+
         function renderizarTabelaClientes() {
             const tbody = document.getElementById('tabela-clientes');
             tbody.innerHTML = '';
@@ -1425,20 +1526,22 @@
                 }
 
                 const tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-50 dark:hover:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800";
+                tr.className = "hover:bg-slate-50 dark:hover:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800 transition cursor-pointer";
                 tr.innerHTML = `
-                    <td class="p-3">
-                        <div class="font-semibold text-slate-800 dark:text-slate-200">${c.nome}</div>
+                    <td class="p-3" onclick="visualizarClienteCard(${c.id})">
+                        <div class="font-semibold text-slate-800 dark:text-slate-200 hover:text-red-600 transition flex items-center gap-1.5">
+                            <i class="fa-solid fa-eye text-[10px] text-slate-400"></i> ${c.nome}
+                        </div>
                         <div class="text-[10px] text-slate-400">${c.doc || 'Sem CPF/CNPJ'}</div>
                     </td>
-                    <td class="p-3">
+                    <td class="p-3" onclick="visualizarClienteCard(${c.id})">
                         <div class="text-xs text-slate-700 dark:text-slate-300">${c.contato || '-'}</div>
                         <div class="text-[10px] text-slate-400">${c.telefone || '-'}</div>
                     </td>
-                    <td class="p-3 text-right font-bold text-emerald-600">
+                    <td class="p-3 text-right font-bold text-emerald-600" onclick="visualizarClienteCard(${c.id})">
                         R$ ${totalMesCliente.toLocaleString('pt-BR', {minimumFractionDigits: 2})}
                     </td>
-                    <td class="p-3 text-right font-bold text-amber-600">
+                    <td class="p-3 text-right font-bold text-amber-600" onclick="visualizarClienteCard(${c.id})">
                         R$ ${aReceberCliente.toLocaleString('pt-BR', {minimumFractionDigits: 2})}
                     </td>
                     <td class="p-3 text-center space-x-1">
