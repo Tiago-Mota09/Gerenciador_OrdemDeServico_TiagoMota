@@ -1,0 +1,1664 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <!-- Favicon / Logo na Aba do Navegador -->
+    <link rel="shortcut icon" href="logo.ico" type="image/x-icon">
+    <link rel="icon" href="logo.ico" type="image/x-icon">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Gestão e Emissão de Ordens de Serviço | Tiago Mota</title>
+    <!-- Tailwind CSS for UI -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f1f5f9;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .os-card {
+            background-color: #f8fafc;
+            border-radius: 12px;
+            padding: 12px 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            border: 1px solid #e2e8f0;
+        }
+
+        .os-header-bg {
+            background: linear-gradient(135deg, #000000 0%, #1a1a1a 60%, #2d2d2d 100%);
+        }
+
+        .os-footer-bg {
+            background: linear-gradient(135deg, #0d0d0d 0%, #1f1f1f 100%);
+        }
+
+        /* ESTILOS DO MODO ESCURO (DARK MODE) GERAL */
+        .dark body {
+            background-color: #0f172a !important;
+            color: #f1f5f9 !important;
+        }
+        .dark .app-card-dark {
+            background-color: #1e293b !important;
+            color: #f1f5f9 !important;
+            border-color: #334155 !important;
+        }
+        .dark .app-card-dark input, .dark .app-card-dark select, .dark .app-card-dark textarea {
+            background-color: #0f172a !important;
+            color: #f1f5f9 !important;
+            border-color: #475569 !important;
+        }
+        .dark .app-card-dark input::placeholder, .dark .app-card-dark textarea::placeholder {
+            color: #64748b !important;
+        }
+
+        /* GARANTIA ABSOLUTA: O PDF / PREVIEW SEMPRE SERÁ CLARO (MESMO NO MODO ESCURO) */
+        .os-container-print {
+            background-color: #ffffff !important;
+            color: #111827 !important;
+        }
+        .os-container-print .os-card {
+            background-color: #f8fafc !important;
+            color: #111827 !important;
+            border-color: #e2e8f0 !important;
+        }
+        .os-container-print .text-slate-400 {
+            color: #64748b !important;
+        }
+        .os-container-print .text-slate-800, 
+        .os-container-print .text-slate-900,
+        .os-container-print .text-slate-700 {
+            color: #0f172a !important;
+        }
+
+        @media print {
+            body {
+                background-color: #ffffff !important;
+                color: #111827 !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            .no-print {
+                display: none !important;
+            }
+            .print-only {
+                display: block !important;
+            }
+            .os-container-print {
+                box-shadow: none !important;
+                border: none !important;
+                width: 100% !important;
+                max-width: 800px !important;
+                margin: 0 auto !important;
+                padding: 0 !important;
+            }
+            @page {
+                size: A4 portrait;
+                margin: 8mm;
+            }
+        }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <!-- Top Navigation Bar -->
+    <header class="bg-slate-900 text-white shadow-lg no-print sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-red-600 flex items-center justify-center font-bold text-lg shadow-inner overflow-hidden">
+					<img id="view-log1" src="logo.png" class="w-full h-full object-cover">
+				</div>	
+                <div>
+                    <h1 class="font-bold text-lg tracking-wide leading-tight">Sistema de Ordem de Serviço</h1>
+                    <p class="text-xs text-slate-400">Tiago Mota • Arte-Final & Design</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-2 flex-wrap">
+                <!-- Botão Modo Noturno / Escuro -->
+                <button onclick="toggleDarkMode()" class="px-3 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium text-xs md:text-sm transition flex items-center gap-2 border border-slate-700" title="Alternar Modo Noturno">
+                    <i class="fa-solid fa-moon" id="darkModeIcon"></i>
+                </button>
+                <button onclick="switchTab('nova-os')" class="px-3 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white font-medium text-xs md:text-sm transition flex items-center gap-2 shadow">
+                    <i class="fa-solid fa-plus"></i> Nova O.S.
+                </button>
+                <button onclick="switchTab('lista-os')" class="px-3 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium text-xs md:text-sm transition flex items-center gap-2 border border-slate-700">
+                    <i class="fa-solid fa-list-check"></i> Histórico
+                </button>
+                <button onclick="switchTab('clientes')" class="px-3 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium text-xs md:text-sm transition flex items-center gap-2 border border-slate-700">
+                    <i class="fa-solid fa-users"></i> Clientes
+                </button>
+                <button onclick="switchTab('config')" class="px-3 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium text-xs md:text-sm transition flex items-center gap-2 border border-slate-700">
+                    <i class="fa-solid fa-gear"></i> Config & Backup
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-[1550px] mx-auto p-4 md:p-6">
+
+        <!-- TAB 1: FORMULÁRIO DE O.S. + PREVIEW EM TEMPO REAL (AGORA COM LARGURAS IGUAIS EM GRID) -->
+        <section id="tab-nova-os" class="tab-content">
+            <div class="grid grid-cols-1 lg:grid-cols-2 items-start gap-8 w-full">
+                
+                <!-- Formulário de Preenchimento (Mesma largura do Preview) -->
+                <div class="w-full bg-white app-card-dark p-6 rounded-2xl shadow-sm border border-slate-200 no-print space-y-6">
+                    <div class="flex justify-between items-center border-b pb-3">
+                        <h2 class="text-lg font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                            <i class="fa-solid fa-pen-to-square text-red-600"></i> Preencher Ordem de Serviço
+                        </h2>
+                        <span id="os-number-badge" class="bg-red-100 text-red-700 text-xs font-bold px-2.5 py-1 rounded-full">O.S. #330</span>
+                    </div>
+
+                    <!-- Seleção de Cliente -->
+                    <div class="space-y-2">
+                        <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 uppercase">Cliente (Seleção rápida de cadastrado)</label>
+                        <select id="form-select-cliente" onchange="carregarClienteSelecionado()" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-red-500 focus:outline-none">
+                            <option value="">-- Selecionar Cliente Salvo --</option>
+                        </select>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300">Nome do Cliente</label>
+                            <input type="text" id="form-cliente-nome" placeholder="Ex: Tiago Mota" oninput="atualizarPreview()" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm focus:ring-red-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300">Contato / E-mail</label>
+                            <input type="text" id="form-cliente-contato" placeholder="Ex: email@outlook.com" oninput="atualizarPreview()" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm focus:ring-red-500">
+                        </div>
+                    </div>
+
+                    <!-- Resumo e Detalhes -->
+                    <div class="space-y-3 pt-2 border-t dark:border-slate-700">
+                        <h3 class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Resumo do Serviço</h3>
+                        
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300">Título do Trabalho</label>
+                            <input type="text" id="form-titulo" placeholder="Ex: Criação de Logo" oninput="atualizarPreview()" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm">
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300">Vencimento</label>
+                                <input type="date" id="form-vencimento" onchange="atualizarPreview()" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300">Responsável</label>
+                                <input type="text" id="form-responsavel" value="Tiago Mota" oninput="atualizarPreview()" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm font-semibold text-slate-700">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300">Descrição Completa</label>
+                            <textarea id="form-descricao" rows="2" placeholder="Detalhes do serviço..." oninput="atualizarPreview()" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Itens e Serviços -->
+                    <div class="space-y-3 pt-2 border-t dark:border-slate-700">
+                        <div class="flex justify-between items-center">
+                            <h3 class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Itens / Tabela de Preços</h3>
+                            <button onclick="adicionarItem()" class="text-xs text-red-600 hover:text-red-800 font-bold flex items-center gap-1">
+                                <i class="fa-solid fa-plus-circle"></i> Add Item
+                            </button>
+                        </div>
+
+                        <div id="container-itens-form" class="space-y-2 max-h-48 overflow-y-auto pr-1">
+                            <!-- Rows inseridas via JS -->
+                        </div>
+                    </div>
+
+                    <!-- Uploads de Imagens -->
+                    <div class="space-y-3 pt-2 border-t dark:border-slate-700">
+                        <h3 class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Uploads (Logo & Imagem de Referência)</h3>
+                        
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300">Alterar Logo Marca</label>
+                                <input type="file" id="upload-logo" accept="image/*" onchange="carregarImagemLogo(event)" class="text-xs w-full text-slate-500 file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:bg-slate-200 file:text-slate-700 hover:file:bg-slate-300">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300">Imagem de Referência</label>
+                                <input type="file" id="upload-ref" accept="image/*" onchange="carregarImagemRef(event)" class="text-xs w-full text-slate-500 file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:bg-slate-200 file:text-slate-700 hover:file:bg-slate-300">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Botões de Ação -->
+                    <div class="pt-4 border-t dark:border-slate-700 flex gap-3">
+                        <button onclick="salvarOS()" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 rounded-xl shadow transition flex items-center justify-center gap-2 text-sm">
+                            <i class="fa-solid fa-floppy-disk"></i> Salvar O.S.
+                        </button>
+                        <button onclick="imprimirOS()" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-xl shadow transition flex items-center justify-center gap-2 text-sm">
+                            <i class="fa-solid fa-file-pdf"></i> Emitir PDF
+                        </button>
+                    </div>
+
+                    <!-- STATUS DE PAGAMENTO DA O.S. ATUAL -->
+                    <div class="pt-2 border-t dark:border-slate-700 space-y-1">
+                        <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 uppercase">Status do Pagamento</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <label id="btn-status-a-receber" class="flex items-center justify-center gap-2 p-2 rounded-lg border-2 border-amber-500 bg-amber-50 text-amber-800 font-bold text-xs cursor-pointer transition">
+                                <input type="radio" name="form-status-pagamento" value="a_receber" checked onchange="atualizarPreview()" class="accent-amber-600">
+                                <i class="fa-solid fa-clock text-amber-600"></i> À Receber
+                            </label>
+                            <label id="btn-status-recebido" class="flex items-center justify-center gap-2 p-2 rounded-lg border-2 border-slate-200 bg-slate-50 text-slate-600 font-bold text-xs cursor-pointer transition">
+                                <input type="radio" name="form-status-pagamento" value="recebido" onchange="atualizarPreview()" class="accent-emerald-600">
+                                <i class="fa-solid fa-circle-check text-emerald-600"></i> Recebido (Pago)
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- CARDS MENORES DE STATUS DO MÊS -->
+                    <div class="grid grid-cols-2 gap-3 mt-4">
+                        <div class="bg-amber-950/80 border border-amber-500/30 text-amber-200 rounded-xl p-3 shadow-sm">
+                            <div class="flex items-center justify-between mb-1">
+                                <span class="text-[10px] font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1">
+                                    <i class="fa-solid fa-hourglass-half text-amber-400"></i> À Receber
+                                </span>
+                                <span id="resumo-qtd-a-receber" class="text-[10px] text-amber-300/70 font-semibold">(0)</span>
+                            </div>
+                            <span id="resumo-total-a-receber" class="text-base font-black text-amber-300 block">R$ 0,00</span>
+                        </div>
+
+                        <div class="bg-emerald-950/80 border border-emerald-500/30 text-emerald-200 rounded-xl p-3 shadow-sm">
+                            <div class="flex items-center justify-between mb-1">
+                                <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1">
+                                    <i class="fa-solid fa-circle-check text-emerald-400"></i> Recebido
+                                </span>
+                                <span id="resumo-qtd-recebido" class="text-[10px] text-emerald-300/70 font-semibold">(0)</span>
+                            </div>
+                            <span id="resumo-total-recebido" class="text-base font-black text-emerald-300 block">R$ 0,00</span>
+                        </div>
+                    </div>
+
+                    <!-- RESUMO DE VALORES DO MÊS ATUAL -->
+                    <div class="mt-3 bg-slate-900 text-white rounded-xl p-4 shadow border border-slate-800">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <i class="fa-solid fa-chart-line text-emerald-400 text-lg"></i>
+                                <div>
+                                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-300">Total acumulado neste mês</h4>
+                                    <p id="label-mes-atual" class="text-[11px] text-slate-400 font-medium">Mês Atual</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <span id="resumo-total-mes" class="text-xl font-black text-emerald-400">R$ 0,00</span>
+                                <span id="resumo-qtd-mes" class="block text-[10px] text-slate-400 font-semibold">(0 O.S. salvas)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PREVIEW DO PDF DA O.S. (Largura idêntica via Grid) -->
+                <div class="w-full flex justify-center items-start">
+                    
+                    <div id="os-document-preview" class="os-container-print rounded-xl shadow-2xl overflow-hidden w-full border border-slate-200 relative min-h-[900px] flex flex-col justify-between">
+                        
+                        <div>
+                            <!-- HEADER PRETO COM DEGRADÊ -->
+                            <div class="os-header-bg text-white p-5 flex items-center justify-between relative overflow-hidden">
+                                <div class="flex items-center gap-4 z-10">
+                                    <div class="w-20 h-20 rounded-full border-2 border-amber-400/60 overflow-hidden bg-slate-900 flex items-center justify-center shadow-lg shrink-0">
+                                        <img id="view-logo" src="logo.png" class="w-full h-full object-cover">
+                                    </div>
+                                    <div>
+                                        <h2 class="text-2xl font-black tracking-wider uppercase text-white drop-shadow">ORDEM DE SERVIÇO</h2>
+                                        <p class="text-xs text-slate-300 font-semibold mt-0.5" id="view-empresa-cnpj">CNPJ: 54.740.416/0001-75</p>
+                                        <p class="text-[11px] text-slate-400 max-w-sm leading-tight mt-0.5" id="view-empresa-endereco">
+                                            Rua: Cosmo José da Silva,140, Cidade Líder, São Paulo / SP, CEP 08285300
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- BODY DA ORDEM DE SERVIÇO -->
+                            <div class="p-6 space-y-5">
+                                <div>
+                                    <div class="flex justify-between items-end mb-2">
+                                        <span class="text-xs font-bold text-slate-400 tracking-wider uppercase">CLIENTE</span>
+                                        <span class="text-xs font-semibold text-slate-500" id="view-os-info">
+                                            OS: 330 gerada em 18 de setembro de 2026 às 10:35
+                                        </span>
+                                    </div>
+
+                                    <div class="os-card grid grid-cols-12 gap-4">
+                                        <div class="col-span-6">
+                                            <span class="text-[10px] font-bold text-slate-400 uppercase block">NOME</span>
+                                            <span id="view-cliente-nome" class="text-sm font-semibold text-slate-800">---</span>
+                                        </div>
+                                        <div class="col-span-6">
+                                            <span class="text-[10px] font-bold text-slate-400 uppercase block">CONTATO</span>
+                                            <span id="view-cliente-contato" class="text-sm font-semibold text-slate-800">---</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- SEÇÃO RESUMO -->
+                                <div>
+                                    <h3 class="text-xs font-bold text-slate-400 tracking-wider uppercase mb-2">RESUMO</h3>
+                                    
+                                    <div class="os-card space-y-3">
+                                        <div class="grid grid-cols-12 gap-4">
+                                            <div class="col-span-7">
+                                                <span class="text-[10px] font-bold text-slate-400 uppercase block">TÍTULO</span>
+                                                <p id="view-titulo" class="text-sm font-semibold text-slate-800 leading-snug">---</p>
+                                            </div>
+                                            <div class="col-span-5 space-y-2">
+                                                <div>
+                                                    <span class="text-[10px] font-bold text-slate-400 uppercase block">VENCIMENTO</span>
+                                                    <span id="view-vencimento" class="text-sm font-semibold text-slate-800">---</span>
+                                                </div>
+                                                <div>
+                                                    <span class="text-[10px] font-bold text-slate-400 uppercase block">RESPONSÁVEL</span>
+                                                    <span id="view-responsavel" class="text-sm font-semibold text-slate-800">Tiago Mota</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="border-t border-slate-200/60 pt-2">
+                                            <span class="text-[10px] font-bold text-slate-400 uppercase block">DESCRIÇÃO</span>
+                                            <p id="view-descricao" class="text-xs text-slate-700 mt-0.5 whitespace-pre-line">---</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- SEÇÃO ITENS E SERVIÇOS -->
+                                <div>
+                                    <h3 class="text-xs font-bold text-slate-400 tracking-wider uppercase mb-2">ITENS E SERVIÇOS</h3>
+
+                                    <div class="os-card p-0 overflow-hidden">
+                                        <table class="w-full text-left border-collapse">
+                                            <thead>
+                                                <tr class="text-[10px] font-bold text-slate-400 uppercase border-b border-slate-200">
+                                                    <th class="py-2.5 px-4 font-bold">DESCRIÇÃO</th>
+                                                    <th class="py-2.5 px-2 text-center font-bold w-16">QTD</th>
+                                                    <th class="py-2.5 px-3 text-right font-bold w-28">VALOR UNIT.</th>
+                                                    <th class="py-2.5 px-4 text-right font-bold w-28">TOTAL</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="view-tabela-itens" class="divide-y divide-slate-100 text-xs text-slate-800 font-medium">
+                                                <!-- Linhas inseridas via JS -->
+                                            </tbody>
+                                        </table>
+
+                                        <div class="p-3 bg-slate-100/70 border-t border-slate-200 flex justify-end items-center gap-3">
+                                            <span class="text-xs font-bold text-slate-600 uppercase tracking-wider">TOTAL GERAL</span>
+                                            <span id="view-total-geral" class="text-lg font-black text-slate-900">R$ 0,00</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- ÁREA DE IMAGEM DE REFERÊNCIA -->
+                                <div class="pt-2">
+                                    <div class="text-center mb-1 flex items-center justify-center gap-1">
+                                        <span class="text-xs font-black text-red-500 uppercase tracking-widest">IMAGEM DE REFERÊNCIA</span>
+                                        <span class="text-[10px] text-slate-400 no-print">(Arraste e solte uma imagem abaixo ou clique)</span>
+                                    </div>
+                                    <div id="drop-zone-ref" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDropRef(event)" onclick="document.getElementById('upload-ref').click()" class="border-2 border-dashed border-slate-300 hover:border-red-500 rounded-2xl p-4 flex flex-col items-center justify-center bg-slate-50/50 hover:bg-red-50/20 transition cursor-pointer min-h-[160px] max-h-[220px] relative group">
+                                        <img id="view-imagem-ref" src="logo.png" alt="Imagem de Referência" class="max-h-40 object-contain rounded">
+                                        <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition rounded-2xl flex items-center justify-center text-white text-xs font-bold gap-2 no-print">
+                                            <i class="fa-solid fa-cloud-arrow-up text-lg"></i> Solte ou clique para alterar a imagem
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- AVISO LEGAL -->
+                                <div class="text-center pt-2 pb-1">
+                                    <p class="text-[11px] font-bold text-red-500 uppercase tracking-tight">
+                                        NÃO NOS RESPONSABILIZAMOS POR ERROS ORTOGRÁFICOS E TÉCNICOS, FAVOR CONFERIR ANTES DA APROVAÇÃO.
+                                    </p>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <!-- RODAPÉ -->
+                        <div class="os-footer-bg text-white py-3.5 px-6 mt-4">
+                            <div class="flex flex-wrap items-center justify-between text-xs gap-3 font-medium">
+                                <div class="flex items-center gap-2">
+                                    <i class="fa-regular fa-envelope text-slate-400"></i>
+                                    <span id="view-footer-email">tiago.mota.arte@outlook.com</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <i class="fa-brands fa-whatsapp text-emerald-400"></i>
+                                    <span id="view-footer-whatsapp">(11) 99883-5362</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <i class="fa-solid fa-diamond text-amber-400 text-[10px]"></i>
+                                    <span>PIX: <span id="view-footer-pix">tiago.mota.arte@outlook.com</span></span>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 2: HISTÓRICO DE ORDENS DE SERVIÇO -->
+        <section id="tab-lista-os" class="tab-content hidden">
+            <div class="bg-white app-card-dark p-6 rounded-2xl shadow-sm border border-slate-200">
+                <div class="flex flex-wrap justify-between items-center gap-4 mb-6">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-800 dark:text-slate-100">Histórico de Ordens de Serviço</h2>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Gerencie, edite, reimprima e atualize o pagamento de O.S. já criadas</p>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <select id="filter-status-os" onchange="filtrarOS()" class="bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm font-medium text-slate-700">
+                            <option value="todos">Todos os Status</option>
+                            <option value="a_receber">⏳ À Receber</option>
+                            <option value="recebido">✅ Recebidos (Pagos)</option>
+                        </select>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
+                                <i class="fa-solid fa-magnifying-glass text-xs"></i>
+                            </span>
+                            <input type="text" id="search-os" placeholder="Buscar por nº, cliente ou título..." onkeyup="filtrarOS()" class="bg-slate-50 border border-slate-300 rounded-lg pl-9 pr-3 py-2 text-sm w-64 focus:ring-2 focus:ring-red-500 focus:outline-none">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm border-collapse">
+                        <thead>
+                            <tr class="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 uppercase text-[11px] font-bold border-b">
+                                <th class="p-3">Nº O.S.</th>
+                                <th class="p-3">Data/Hora</th>
+                                <th class="p-3">Cliente</th>
+                                <th class="p-3">Título</th>
+                                <th class="p-3 text-center">Status Pagamento</th>
+                                <th class="p-3 text-right">Total</th>
+                                <th class="p-3 text-center">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabela-lista-os" class="divide-y divide-slate-100 dark:divide-slate-800">
+                            <!-- Inserido dinamicamente via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 3: CRUD DE CLIENTES -->
+        <section id="tab-clientes" class="tab-content hidden">
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+                <div class="md:col-span-5 bg-white app-card-dark p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
+                    <h2 class="text-lg font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2" id="cliente-form-title">
+                        <i class="fa-solid fa-user-plus text-red-600"></i> Cadastro de Cliente
+                    </h2>
+                    <input type="hidden" id="cliente-id">
+                    
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Nome Completo / Razão Social *</label>
+                        <input type="text" id="crud-cliente-nome" placeholder="Ex: Nome do Cliente" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">CPF / CNPJ</label>
+                            <input type="text" id="crud-cliente-doc" placeholder="00.000.000/0001-00" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Telefone / WhatsApp</label>
+                            <input type="text" id="crud-cliente-telefone" placeholder="(11) 99999-8888" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">E-mail / Contato</label>
+                        <input type="text" id="crud-cliente-contato" placeholder="email@outlook.com" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm">
+                    </div>
+
+                    <div class="pt-2 border-t dark:border-slate-700 space-y-3">
+                        <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Endereço do Cliente</span>
+                        
+                        <div class="grid grid-cols-3 gap-2">
+                            <div class="col-span-1">
+                                <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">CEP</label>
+                                <input type="text" id="crud-cliente-cep" placeholder="00000-000" onkeyup="buscarCEP(this.value)" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm font-semibold text-red-600">
+                            </div>
+                            <div class="col-span-2 flex items-end">
+                                <span id="cep-loading" class="text-xs text-slate-500 hidden"><i class="fa-solid fa-spinner fa-spin text-red-600 mr-1"></i> Buscando...</span>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-12 gap-2">
+                            <div class="col-span-8">
+                                <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Endereço (Logradouro)</label>
+                                <input type="text" id="crud-cliente-endereco" placeholder="Logradouro..." class="w-full bg-slate-100 border border-slate-300 rounded-lg p-2 text-sm">
+                            </div>
+                            <div class="col-span-4">
+                                <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Número</label>
+                                <input type="text" id="crud-cliente-numero" placeholder="Nº" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Complemento</label>
+                                <input type="text" id="crud-cliente-complemento" placeholder="Sala / Bloco" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Bairro</label>
+                                <input type="text" id="crud-cliente-bairro" placeholder="Bairro" class="w-full bg-slate-100 border border-slate-300 rounded-lg p-2 text-sm">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-12 gap-2">
+                            <div class="col-span-8">
+                                <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Cidade</label>
+                                <input type="text" id="crud-cliente-cidade" placeholder="Cidade" class="w-full bg-slate-100 border border-slate-300 rounded-lg p-2 text-sm">
+                            </div>
+                            <div class="col-span-4">
+                                <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Estado (UF)</label>
+                                <input type="text" id="crud-cliente-estado" placeholder="UF" class="w-full bg-slate-100 border border-slate-300 rounded-lg p-2 text-sm text-center uppercase font-bold">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-2 pt-3 border-t dark:border-slate-700">
+                        <button onclick="salvarCliente()" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-lg text-sm shadow">
+                            Salvar Cliente
+                        </button>
+                        <button onclick="limparFormCliente()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold px-3 py-2.5 rounded-lg text-sm">
+                            Cancelar
+                        </button>
+                    </div>
+                </div>
+
+                <div class="md:col-span-7 bg-white app-card-dark p-6 rounded-2xl shadow-sm border border-slate-200">
+                    <h2 class="text-lg font-bold text-slate-800 dark:text-slate-100 mb-4">Base de Clientes Cadastrados</h2>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm border-collapse">
+                            <thead>
+                                <tr class="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 uppercase text-[11px] font-bold border-b">
+                                    <th class="p-3">Cliente / Doc</th>
+                                    <th class="p-3">Contato / Tel</th>
+                                    <th class="p-3 text-right">Total Mês</th>
+                                    <th class="p-3 text-right">A Receber</th>
+                                    <th class="p-3 text-center">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabela-clientes" class="divide-y divide-slate-100 dark:divide-slate-800">
+                                <!-- Preenchido via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 4: CONFIGURAÇÕES DA EMPRESA + BACKUP DE SEGURANÇA -->
+        <section id="tab-config" class="tab-content hidden">
+            <div class="max-w-2xl mx-auto space-y-6">
+                <!-- Bloco de Dados da Empresa -->
+                <div class="bg-white app-card-dark p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
+                    <h2 class="text-lg font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                        <i class="fa-solid fa-building text-red-600"></i> Configurações do Emissor
+                    </h2>
+                    
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">CNPJ</label>
+                        <input type="text" id="cfg-cnpj" value="54.740.416/0001-75" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Endereço Comercial</label>
+                        <input type="text" id="cfg-endereco" value="Rua: Cosmo José da Silva,140, Cidade Líder, São Paulo / SP, CEP 08285300" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">E-mail Rodapé</label>
+                        <input type="text" id="cfg-email" value="tiago.mota.arte@outlook.com" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">WhatsApp Rodapé</label>
+                        <input type="text" id="cfg-whatsapp" value="(11) 99883-5362" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Chave PIX Rodapé</label>
+                        <input type="text" id="cfg-pix" value="tiago.mota.arte@outlook.com" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm">
+                    </div>
+
+                    <button onclick="salvarConfiguracoes()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-lg text-sm shadow">
+                        Salvar Configurações
+                    </button>
+                </div>
+
+                <!-- Bloco de Backup e Segurança contra Limpeza de Cache -->
+                <div class="bg-slate-900 text-white p-6 rounded-2xl shadow border border-slate-800 space-y-4">
+                    <div class="flex items-center gap-2 border-b border-slate-800 pb-3">
+                        <i class="fa-solid fa-shield-halved text-amber-400 text-lg"></i>
+                        <div>
+                            <h2 class="text-base font-bold text-white">Segurança de Dados e Backup</h2>
+                            <p class="text-xs text-slate-400">Proteja suas O.S. e clientes contra limpeza de cache ou cookies do navegador</p>
+                        </div>
+                    </div>
+
+                    <p class="text-xs text-slate-300 leading-relaxed">
+                        Faça o download periódico de um arquivo de backup (`.json`). Caso limpe o navegador ou mude de computador, basta restaurar o arquivo para recuperar todo o seu histórico instantaneamente.
+                    </p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2">
+                        <!-- Botão Exportar Backup -->
+                        <button onclick="fazerBackupOS()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-4 rounded-xl shadow transition flex items-center justify-center gap-2 text-sm">
+                            <i class="fa-solid fa-download"></i> Baixar Backup (.json)
+                        </button>
+
+                        <!-- Botão Restaurar Backup -->
+                        <label class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-xl shadow transition flex items-center justify-center gap-2 text-sm cursor-pointer">
+                            <i class="fa-solid fa-upload"></i> Restaurar Backup
+                            <input type="file" id="input-restore" accept=".json" onchange="restaurarBackupOS(event)" class="hidden">
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- MODAL / CONTAINER OCULTO PARA IMPRESSÃO DO RELATÓRIO DE FECHAMENTO -->
+    <div id="modal-relatorio-fechamento" class="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4 hidden no-print">
+        <div class="bg-white rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl flex flex-col">
+            <div class="p-4 bg-slate-900 text-white flex justify-between items-center no-print">
+                <h3 class="font-bold text-sm flex items-center gap-2"><i class="fa-solid fa-file-invoice-dollar text-emerald-400"></i> Relatório de Fechamento de Valores em Aberto</h3>
+                <div class="flex items-center gap-2">
+                    <button onclick="imprimirRelatorioFechamento()" class="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-lg shadow">
+                        <i class="fa-solid fa-file-pdf mr-1"></i> Baixar PDF / Imprimir
+                    </button>
+                    <button onclick="fecharModalRelatorio()" class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-white text-xs font-bold rounded-lg">
+                        Fechar
+                    </button>
+                </div>
+            </div>
+
+            <!-- DOCUMENTO IMPRESSÍVEL (ESTILO IDÊNTICO À O.S.) -->
+            <div class="p-6 flex justify-center">
+                <div id="conteudo-relatorio-pdf" class="os-container-print rounded-xl shadow border border-slate-200 overflow-hidden relative min-h-[800px] w-full max-w-[750px] flex flex-col justify-between">
+                    <div>
+                        <!-- HEADER -->
+                        <div class="os-header-bg text-white p-5 flex items-center justify-between relative overflow-hidden">
+                            <div class="flex items-center gap-4 z-10">
+                                <div class="w-20 h-20 rounded-full border-2 border-amber-400/60 overflow-hidden bg-slate-900 flex items-center justify-center shadow-lg shrink-0">
+                                    <img id="rel-view-logo" src="logo.png" class="w-full h-full object-cover">
+                                </div>
+                                <div>
+                                    <h2 class="text-xl font-black tracking-wider uppercase text-white drop-shadow">FECHAMENTO DE VALORES EM ABERTO</h2>
+                                    <p class="text-xs text-slate-300 font-semibold mt-0.5" id="rel-view-cnpj">CNPJ: 54.740.416/0001-75</p>
+                                    <p class="text-[11px] text-slate-400 max-w-sm leading-tight mt-0.5" id="rel-view-endereco">
+                                        Rua: Cosmo José da Silva,140, Cidade Líder, São Paulo / SP
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- CORPO DO RELATÓRIO -->
+                        <div class="p-6 space-y-4">
+                            <div class="flex justify-between items-end">
+                                <span class="text-xs font-bold text-slate-400 tracking-wider uppercase">EXTRATO DE PENDÊNCIAS</span>
+                                <span class="text-xs font-semibold text-slate-500" id="rel-view-data-geracao">Emitido em: 18/09/2026</span>
+                            </div>
+
+                            <div class="os-card grid grid-cols-12 gap-4">
+                                <div class="col-span-8">
+                                    <span class="text-[10px] font-bold text-slate-400 uppercase block">CLIENTE</span>
+                                    <span id="rel-view-cliente-nome" class="text-sm font-semibold text-slate-800">---</span>
+                                </div>
+                                <div class="col-span-4">
+                                    <span class="text-[10px] font-bold text-slate-400 uppercase block">CONTATO / TEL</span>
+                                    <span id="rel-view-cliente-contato" class="text-sm font-semibold text-slate-800">---</span>
+                                </div>
+                            </div>
+
+                            <!-- TABELA DE O.S. EM ABERTO (MÊS ATUAL + ANTERIORES) -->
+                            <div>
+                                <h3 class="text-xs font-bold text-slate-400 tracking-wider uppercase mb-2">ORDENS DE SERVIÇO PENDENTES (ABERTAS)</h3>
+                                <div class="os-card p-0 overflow-hidden">
+                                    <table class="w-full text-left border-collapse">
+                                        <thead>
+                                            <tr class="text-[10px] font-bold text-slate-400 uppercase border-b border-slate-200 bg-slate-100/50">
+                                                <th class="py-2.5 px-3 font-bold w-16">Nº O.S.</th>
+                                                <th class="py-2.5 px-3 font-bold">TÍTULO / SERVIÇO</th>
+                                                <th class="py-2.5 px-3 font-bold w-24">VENCIMENTO</th>
+                                                <th class="py-2.5 px-3 text-right font-bold w-28">VALOR (R$)</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="rel-tabela-itens" class="divide-y divide-slate-100 text-xs text-slate-800 font-medium">
+                                            <!-- Linhas inseridas via JS -->
+                                        </tbody>
+                                    </table>
+
+                                    <div class="p-4 bg-amber-50/80 border-t border-amber-200 flex justify-between items-center">
+                                        <span class="text-xs font-bold text-amber-900 uppercase tracking-wider">TOTAL GERAL EM ABERTO (Pendente)</span>
+                                        <span id="rel-view-total-geral" class="text-lg font-black text-amber-800">R$ 0,00</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- RODAPÉ -->
+                    <div class="os-footer-bg text-white py-3 px-6 mt-4">
+                        <div class="flex flex-wrap items-center justify-between text-xs gap-3 font-medium">
+                            <div class="flex items-center gap-2">
+                                <i class="fa-regular fa-envelope text-slate-400"></i>
+                                <span id="rel-footer-email">tiago.mota.arte@outlook.com</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <i class="fa-brands fa-whatsapp text-emerald-400"></i>
+                                <span id="rel-footer-whatsapp">(11) 99883-5362</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <i class="fa-solid fa-diamond text-amber-400 text-[10px]"></i>
+                                <span>PIX: <span id="rel-footer-pix">tiago.mota.arte@outlook.com</span></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- LOGICA E BANCO DE DADOS EM JAVASCRIPT -->
+    <script>
+        // ESTADO GLOBAL DO SISTEMA
+        let db = {
+            proximoNumOS: 330,
+            clientes: [
+                { 
+                    id: 1, 
+                    nome: "Tiago Mota Arte-Final (Tiago)", 
+                    doc: "54.740.416/0001-75",
+                    contato: "tiago.mota.arte@outlook.com", 
+                    telefone: "(11) 99883-5362",
+                    cep: "08285-300",
+                    endereco: "Rua Cosmo José da Silva",
+                    numero: "140",
+                    complemento: "",
+                    bairro: "Cidade Líder",
+                    cidade: "São Paulo",
+                    estado: "SP"
+                }
+            ],
+            ordensServico: [],
+            empresa: {
+                cnpj: "54.740.416/0001-75",
+                endereco: "Rua: Cosmo José da Silva,140, Cidade Líder, São Paulo / SP, CEP 08285300",
+                email: "tiago.mota.arte@outlook.com",
+                whatsapp: "(11) 99883-5362",
+                pix: "tiago.mota.arte@outlook.com",
+                logoDataUrl: ""
+            }
+        };
+
+        // Estado do Formulário Atual
+        let formItens = [
+            { descricao: "Vetor Logo Tiago Mota", qtd: 1, valorUnit: 30.00 }
+        ];
+
+        let currentLogoBase64 = "logo.png";
+        let currentRefBase64 = "logo.png";
+        let edicaoOSId = null;
+
+        // INICIALIZAÇÃO
+        window.onload = function() {
+            carregarTemaSalvo();
+            carregarDB();
+            renderizarItensForm();
+            preencherCamposIniciais();
+            atualizarSelectClientes();
+            renderizarTabelaClientes();
+            renderizarTabelaOS();
+            atualizarPreview();
+        };
+
+        // FUNÇÃO DE MODO ESCURO (DARK MODE)
+        function toggleDarkMode() {
+            const html = document.documentElement;
+            const icon = document.getElementById('darkModeIcon');
+            html.classList.toggle('dark');
+            
+            if (html.classList.contains('dark')) {
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+                localStorage.setItem('os_theme', 'dark');
+            } else {
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+                localStorage.setItem('os_theme', 'light');
+            }
+        }
+
+        function carregarTemaSalvo() {
+            if (localStorage.getItem('os_theme') === 'dark') {
+                document.documentElement.classList.add('dark');
+                const icon = document.getElementById('darkModeIcon');
+                if(icon) {
+                    icon.classList.remove('fa-moon');
+                    icon.classList.add('fa-sun');
+                }
+            }
+        }
+
+        function carregarDB() {
+            const saved = localStorage.getItem('os_system_db');
+            if (saved) {
+                try {
+                    db = JSON.parse(saved);
+                } catch(e) { console.error("Erro ao ler localStorage", e); }
+            }
+            if (!db.proximoNumOS || db.proximoNumOS < 330) db.proximoNumOS = 330;
+            if (db.empresa && db.empresa.logoDataUrl) {
+                currentLogoBase64 = db.empresa.logoDataUrl;
+            }
+        }
+
+        function salvarDB() {
+            localStorage.setItem('os_system_db', JSON.stringify(db));
+        }
+
+        // TABS NAVEGAÇÃO
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById('tab-' + tabId).classList.remove('hidden');
+        }
+
+        // BUSCA AUTOMÁTICA DE CEP (ViaCEP API Nacional)
+        function buscarCEP(cepRaw) {
+            const cep = cepRaw.replace(/\D/g, '');
+            if (cep.length === 8) {
+                document.getElementById('cep-loading').classList.remove('hidden');
+                fetch(`https://viacep.com.br/ws/${cep}/json/`)
+                    .then(res => res.json())
+                    .then(data => {
+                        document.getElementById('cep-loading').classList.add('hidden');
+                        if (!data.erro) {
+                            document.getElementById('crud-cliente-endereco').value = data.logradouro || '';
+                            document.getElementById('crud-cliente-bairro').value = data.bairro || '';
+                            document.getElementById('crud-cliente-cidade').value = data.localidade || '';
+                            document.getElementById('crud-cliente-estado').value = data.uf || '';
+                            document.getElementById('crud-cliente-numero').focus();
+                        } else {
+                            alert("CEP não encontrado. Por favor, verifique o número digitado.");
+                        }
+                    })
+                    .catch(err => {
+                        document.getElementById('cep-loading').classList.add('hidden');
+                        console.error("Erro ao consultar CEP:", err);
+                    });
+            }
+        }
+
+        // FUNÇÃO DE GERAR DATA E HORA LOCAL ATUALIZADA
+        function obterDataHoraAtual() {
+            const agora = new Date();
+            const dia = agora.getDate();
+            const meses = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
+            const mes = meses[agora.getMonth()];
+            const ano = agora.getFullYear();
+            const horas = String(agora.getHours()).padStart(2, '0');
+            const minutos = String(agora.getMinutes()).padStart(2, '0');
+            return `${dia} de ${mes} de ${ano} às ${horas}:${minutos}`;
+        }
+
+        function obterDataFormatadaCurta() {
+            const agora = new Date();
+            const dia = String(agora.getDate()).padStart(2, '0');
+            const mes = String(agora.getMonth() + 1).padStart(2, '0');
+            const ano = agora.getFullYear();
+            return `${dia}-${mes}-${ano}`;
+        }
+
+        // PREENCHIMENTO E PREVIEW
+        function preencherCamposIniciais() {
+            document.getElementById('os-number-badge').innerText = 'O.S. #' + db.proximoNumOS;
+            document.getElementById('form-cliente-nome').value = "Tiago Mota Arte-Final (Tiago)";
+            document.getElementById('form-cliente-contato').value = "tiago.mota.arte@outlook.com";
+            document.getElementById('form-titulo').value = db.proximoNumOS + " - Tiago Mota Arte-Final - Vetor Logo Tiago Mota - " + obterDataFormatadaCurta();
+            
+            const d = new Date();
+            d.setDate(d.getDate() + 12);
+            document.getElementById('form-vencimento').value = d.toISOString().split('T')[0];
+            document.getElementById('form-responsavel').value = "Tiago Mota";
+            document.getElementById('form-descricao').value = "Vetor Logo Tiago Mota";
+
+            if (db.empresa) {
+                document.getElementById('cfg-cnpj').value = db.empresa.cnpj || "";
+                document.getElementById('cfg-endereco').value = db.empresa.endereco || "";
+                document.getElementById('cfg-email').value = db.empresa.email || "";
+                document.getElementById('cfg-whatsapp').value = db.empresa.whatsapp || "";
+                document.getElementById('cfg-pix').value = db.empresa.pix || "";
+            }
+        }
+
+        function formatarDataExtenso(dateStr) {
+            if (!dateStr) return '';
+            const partes = dateStr.split('-');
+            if (partes.length !== 3) return dateStr;
+            const data = new Date(partes[0], partes[1] - 1, partes[2]);
+            const meses = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
+            return `${data.getDate()} de ${meses[data.getMonth()]} de ${data.getFullYear()}`;
+        }
+
+        function atualizarResumoMes() {
+            const agora = new Date();
+            const mesAtual = agora.getMonth();
+            const anoAtual = agora.getFullYear();
+            const mesesExtenso = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+
+            const labelMesEl = document.getElementById('label-mes-atual');
+            if (labelMesEl) {
+                labelMesEl.innerText = `${mesesExtenso[mesAtual]} / ${anoAtual}`;
+            }
+
+            let totalMes = 0;
+            let qtdMes = 0;
+            let totalAReceber = 0;
+            let qtdAReceber = 0;
+            let totalRecebido = 0;
+            let qtdRecebido = 0;
+
+            if (db.ordensServico && db.ordensServico.length > 0) {
+                db.ordensServico.forEach(os => {
+                    let dataOS = null;
+                    if (os.dataHoraISO) {
+                        dataOS = new Date(os.dataHoraISO);
+                    } else if (os.vencimento) {
+                        const p = os.vencimento.split('-');
+                        if (p.length === 3) dataOS = new Date(p[0], p[1] - 1, p[2]);
+                    }
+
+                    if (!dataOS || isNaN(dataOS.getTime())) {
+                        dataOS = agora;
+                    }
+
+                    if (dataOS.getMonth() === mesAtual && dataOS.getFullYear() === anoAtual) {
+                        const val = Number(os.totalGeral || 0);
+                        totalMes += val;
+                        qtdMes++;
+
+                        if (os.status === 'recebido') {
+                            totalRecebido += val;
+                            qtdRecebido++;
+                        } else {
+                            totalAReceber += val;
+                            qtdAReceber++;
+                        }
+                    }
+                });
+            }
+
+            const totalEl = document.getElementById('resumo-total-mes');
+            const qtdEl = document.getElementById('resumo-qtd-mes');
+            const totalAReceberEl = document.getElementById('resumo-total-a-receber');
+            const qtdAReceberEl = document.getElementById('resumo-qtd-a-receber');
+            const totalRecebidoEl = document.getElementById('resumo-total-recebido');
+            const qtdRecebidoEl = document.getElementById('resumo-qtd-recebido');
+
+            if (totalEl) totalEl.innerText = `R$ ${totalMes.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            if (qtdEl) qtdEl.innerText = `(${qtdMes} O.S. salvas neste mês)`;
+
+            if (totalAReceberEl) totalAReceberEl.innerText = `R$ ${totalAReceber.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            if (qtdAReceberEl) qtdAReceberEl.innerText = `(${qtdAReceber} O.S.)`;
+
+            if (totalRecebidoEl) totalRecebidoEl.innerText = `R$ ${totalRecebido.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            if (qtdRecebidoEl) qtdRecebidoEl.innerText = `(${qtdRecebido} O.S.)`;
+
+            const statusRadio = document.querySelector('input[name="form-status-pagamento"]:checked');
+            const btnAReceber = document.getElementById('btn-status-a-receber');
+            const btnRecebido = document.getElementById('btn-status-recebido');
+            if (statusRadio && btnAReceber && btnRecebido) {
+                if (statusRadio.value === 'recebido') {
+                    btnRecebido.className = "flex items-center justify-center gap-2 p-2 rounded-lg border-2 border-emerald-500 bg-emerald-50 text-emerald-800 font-bold text-xs cursor-pointer transition";
+                    btnAReceber.className = "flex items-center justify-center gap-2 p-2 rounded-lg border-2 border-slate-200 bg-slate-50 text-slate-600 font-bold text-xs cursor-pointer transition";
+                } else {
+                    btnAReceber.className = "flex items-center justify-center gap-2 p-2 rounded-lg border-2 border-amber-500 bg-amber-50 text-amber-800 font-bold text-xs cursor-pointer transition";
+                    btnRecebido.className = "flex items-center justify-center gap-2 p-2 rounded-lg border-2 border-slate-200 bg-slate-50 text-slate-600 font-bold text-xs cursor-pointer transition";
+                }
+            }
+        }
+
+        function atualizarPreview() {
+            atualizarResumoMes();
+            document.getElementById('view-empresa-cnpj').innerText = "CNPJ: " + (db.empresa.cnpj || "54.740.416/0001-75");
+            document.getElementById('view-empresa-endereco').innerText = db.empresa.endereco || "";
+            
+            document.getElementById('view-logo').src = currentLogoBase64;
+            document.getElementById('view-imagem-ref').src = currentRefBase64;
+			document.getElementById('view-log1').src = currentLogoBase64;
+
+            const clienteNome = document.getElementById('form-cliente-nome').value || "---";
+            const clienteContato = document.getElementById('form-cliente-contato').value || "---";
+            document.getElementById('view-cliente-nome').innerText = clienteNome;
+            document.getElementById('view-cliente-contato').innerText = clienteContato;
+
+            const numOS = edicaoOSId || db.proximoNumOS;
+            const dataHoraAtual = obterDataHoraAtual();
+            document.getElementById('view-os-info').innerText = `OS: ${numOS} gerada em ${dataHoraAtual}`;
+
+            document.getElementById('view-titulo').innerText = document.getElementById('form-titulo').value || "---";
+            const vencVal = document.getElementById('form-vencimento').value;
+            document.getElementById('view-vencimento').innerText = formatarDataExtenso(vencVal) || "---";
+            document.getElementById('view-responsavel').innerText = document.getElementById('form-responsavel').value || "Tiago Mota";
+            document.getElementById('view-descricao').innerText = document.getElementById('form-descricao').value || "";
+
+            const tbody = document.getElementById('view-tabela-itens');
+            tbody.innerHTML = '';
+            let totalGeral = 0;
+
+            formItens.forEach(item => {
+                const totalItem = (item.qtd || 0) * (item.valorUnit || 0);
+                totalGeral += totalItem;
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="py-2.5 px-4">${item.descricao || ''}</td>
+                    <td class="py-2.5 px-2 text-center">${item.qtd || 0}</td>
+                    <td class="py-2.5 px-3 text-right">R$ ${Number(item.valorUnit || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                    <td class="py-2.5 px-4 text-right">R$ ${Number(totalItem).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            document.getElementById('view-total-geral').innerText = `R$ ${Number(totalGeral).toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+
+            document.getElementById('view-footer-email').innerText = db.empresa.email || "tiago.mota.arte@outlook.com";
+            document.getElementById('view-footer-whatsapp').innerText = db.empresa.whatsapp || "(11) 99883-5362";
+            document.getElementById('view-footer-pix').innerText = db.empresa.pix || "tiago.mota.arte@outlook.com";
+        }
+
+        function renderizarItensForm() {
+            const container = document.getElementById('container-itens-form');
+            container.innerHTML = '';
+
+            formItens.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.className = "flex items-center gap-2 bg-slate-100 p-2 rounded-lg";
+                div.innerHTML = `
+                    <input type="text" placeholder="Descrição" value="${item.descricao}" oninput="atualizarItem(${index}, 'descricao', this.value)" class="flex-1 bg-white border border-slate-300 rounded p-1.5 text-xs">
+                    <input type="number" placeholder="Qtd" value="${item.qtd}" min="1" oninput="atualizarItem(${index}, 'qtd', this.value)" class="w-14 bg-white border border-slate-300 rounded p-1.5 text-xs text-center">
+                    <input type="number" placeholder="Valor Unit" value="${item.valorUnit}" step="0.01" oninput="atualizarItem(${index}, 'valorUnit', this.value)" class="w-20 bg-white border border-slate-300 rounded p-1.5 text-xs text-right">
+                    <button onclick="removerItem(${index})" class="text-red-500 hover:text-red-700 p-1"><i class="fa-solid fa-trash-can"></i></button>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function adicionarItem() {
+            formItens.push({ descricao: "", qtd: 1, valorUnit: 0.00 });
+            renderizarItensForm();
+            atualizarPreview();
+        }
+
+        function atualizarItem(index, campo, valor) {
+            if (campo === 'qtd' || campo === 'valorUnit') {
+                formItens[index][campo] = parseFloat(valor) || 0;
+            } else {
+                formItens[index][campo] = valor;
+            }
+            atualizarPreview();
+        }
+
+        function removerItem(index) {
+            if (formItens.length > 1) {
+                formItens.splice(index, 1);
+                renderizarItensForm();
+                atualizarPreview();
+            }
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const dropZone = document.getElementById('drop-zone-ref');
+            if (dropZone) dropZone.classList.add('border-red-500', 'bg-red-50/40');
+        }
+
+        function handleDragLeave(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const dropZone = document.getElementById('drop-zone-ref');
+            if (dropZone) dropZone.classList.remove('border-red-500', 'bg-red-50/40');
+        }
+
+        function handleDropRef(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const dropZone = document.getElementById('drop-zone-ref');
+            if (dropZone) dropZone.classList.remove('border-red-500', 'bg-red-50/40');
+
+            const files = e.dataTransfer.files;
+            if (files && files.length > 0) {
+                const file = files[0];
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = function(evt) {
+                        currentRefBase64 = evt.target.result;
+                        atualizarPreview();
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    alert("Por favor, solte apenas arquivos de imagem.");
+                }
+            }
+        }
+
+        function carregarImagemLogo(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    currentLogoBase64 = e.target.result;
+                    db.empresa.logoDataUrl = currentLogoBase64;
+                    salvarDB();
+                    atualizarPreview();
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function carregarImagemRef(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    currentRefBase64 = e.target.result;
+                    atualizarPreview();
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function baixarJsonIndividual(objeto, nomeArquivo) {
+            const dadosStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(objeto, null, 4));
+            const elementoDownload = document.createElement('a');
+            elementoDownload.setAttribute("href", dadosStr);
+            elementoDownload.setAttribute("download", nomeArquivo);
+            document.body.appendChild(elementoDownload);
+            elementoDownload.click();
+            elementoDownload.remove();
+        }
+
+        function salvarOS() {
+            const numOS = edicaoOSId || db.proximoNumOS;
+            
+            let totalGeral = 0;
+            formItens.forEach(i => totalGeral += (i.qtd * i.valorUnit));
+
+            const statusPagamento = document.querySelector('input[name="form-status-pagamento"]:checked')?.value || 'a_receber';
+
+            const osObj = {
+                id: numOS,
+                dataGeracao: obterDataHoraAtual(),
+                dataHoraISO: new Date().toISOString(),
+                clienteNome: document.getElementById('form-cliente-nome').value,
+                clienteContato: document.getElementById('form-cliente-contato').value,
+                titulo: document.getElementById('form-titulo').value,
+                vencimento: document.getElementById('form-vencimento').value,
+                responsavel: document.getElementById('form-responsavel').value,
+                descricao: document.getElementById('form-descricao').value,
+                status: statusPagamento,
+                itens: [...formItens],
+                totalGeral: totalGeral,
+                imagemRef: currentRefBase64
+            };
+
+            const idx = db.ordensServico.findIndex(o => o.id === numOS);
+            if (idx >= 0) {
+                db.ordensServico[idx] = osObj;
+            } else {
+                db.ordensServico.push(osObj);
+                let proximo = 330;
+                while (db.ordensServico.some(o => o.id === proximo)) {
+                    proximo++;
+                }
+                db.proximoNumOS = proximo;
+            }
+
+            salvarDB();
+            renderizarTabelaOS();
+            renderizarTabelaClientes();
+
+            baixarJsonIndividual(osObj, `os_${numOS}.json`);
+
+            const nomeClienteAtual = document.getElementById('form-cliente-nome').value;
+            let clienteObj = db.clientes.find(c => c.nome.toLowerCase() === nomeClienteAtual.toLowerCase());
+            if (!clienteObj) {
+                clienteObj = {
+                    id: Date.now(),
+                    nome: nomeClienteAtual,
+                    contato: document.getElementById('form-cliente-contato').value,
+                    data_cadastro: new Date().toISOString()
+                };
+            }
+            baixarJsonIndividual(clienteObj, `cliente_${clienteObj.id}.json`);
+            
+            edicaoOSId = null;
+            document.getElementById('os-number-badge').innerText = 'O.S. #' + db.proximoNumOS;
+            alert("Ordem de Serviço salva com sucesso! Os arquivos JSON da O.S. e do cliente foram baixados automaticamente.");
+        }
+
+        function imprimirOS() {
+            window.print();
+        }
+
+        function atualizarStatusTabela(id, novoStatus) {
+            const os = db.ordensServico.find(o => o.id === id);
+            if (os) {
+                os.status = novoStatus;
+                salvarDB();
+                renderizarTabelaOS();
+                renderizarTabelaClientes();
+                atualizarPreview();
+            }
+        }
+
+        function deletarOS(id) {
+            if (confirm(`Deseja realmente excluir a Ordem de Serviço #${id}?`)) {
+                db.ordensServico = db.ordensServico.filter(o => o.id !== id);
+                if (id < db.proximoNumOS) {
+                    db.proximoNumOS = id;
+                }
+                salvarDB();
+                renderizarTabelaOS();
+                renderizarTabelaClientes();
+                atualizarPreview();
+                preencherCamposIniciais();
+            }
+        }
+
+        function renderizarTabelaOS() {
+            const tbody = document.getElementById('tabela-lista-os');
+            tbody.innerHTML = '';
+
+            if (db.ordensServico.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-slate-400">Nenhuma Ordem de Serviço cadastrada ainda.</td></tr>`;
+                return;
+            }
+
+            db.ordensServico.forEach(os => {
+                const currentStatus = os.status || 'a_receber';
+                
+                const statusSelectHTML = `
+                    <select onchange="atualizarStatusTabela(${os.id}, this.value)" class="text-xs font-bold px-2.5 py-1.5 rounded-lg border transition cursor-pointer ${currentStatus === 'recebido' ? 'bg-emerald-50 text-emerald-800 border-emerald-300' : 'bg-amber-50 text-amber-800 border-amber-300'}">
+                        <option value="a_receber" ${currentStatus === 'a_receber' ? 'selected' : ''}>⏳ À Receber</option>
+                        <option value="recebido" ${currentStatus === 'recebido' ? 'selected' : ''}>✅ Recebido (Pago)</option>
+                    </select>
+                `;
+
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 dark:hover:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800";
+                tr.setAttribute('data-status', currentStatus);
+                tr.innerHTML = `
+                    <td class="p-3 font-bold text-slate-800 dark:text-slate-200">#${os.id}</td>
+                    <td class="p-3 text-slate-500 dark:text-slate-400 text-xs">${os.dataGeracao}</td>
+                    <td class="p-3 font-semibold text-slate-800 dark:text-slate-200">${os.clienteNome}</td>
+                    <td class="p-3 text-slate-600 dark:text-slate-300 text-xs max-w-xs truncate">${os.titulo}</td>
+                    <td class="p-3 text-center">${statusSelectHTML}</td>
+                    <td class="p-3 text-right font-black text-slate-800 dark:text-slate-200">R$ ${Number(os.totalGeral).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                    <td class="p-3 text-center space-x-1">
+                        <button onclick="carregarOSEdicao(${os.id})" class="px-2 py-1 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 rounded text-xs text-slate-700 dark:text-slate-200 font-medium transition" title="Editar O.S.">
+                            <i class="fa-solid fa-pen"></i> Editar
+                        </button>
+                        <button onclick="deletarOS(${os.id})" class="px-2 py-1 bg-rose-100 dark:bg-rose-900/40 hover:bg-rose-200 rounded text-xs text-rose-700 dark:text-rose-300 font-medium transition" title="Excluir O.S.">
+                            <i class="fa-solid fa-trash-can"></i> Excluir
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function carregarOSEdicao(id) {
+            const os = db.ordensServico.find(o => o.id === id);
+            if (!os) return;
+
+            edicaoOSId = os.id;
+            document.getElementById('os-number-badge').innerText = 'Editando O.S. #' + os.id;
+            document.getElementById('form-cliente-nome').value = os.clienteNome;
+            document.getElementById('form-cliente-contato').value = os.clienteContato;
+            document.getElementById('form-titulo').value = os.titulo;
+            document.getElementById('form-vencimento').value = os.vencimento;
+            document.getElementById('form-responsavel').value = os.responsavel;
+            document.getElementById('form-descricao').value = os.descricao;
+
+            const st = os.status || 'a_receber';
+            const radioEl = document.querySelector(`input[name="form-status-pagamento"][value="${st}"]`);
+            if (radioEl) radioEl.checked = true;
+
+            formItens = [...os.itens];
+            if (os.imagemRef) currentRefBase64 = os.imagemRef;
+
+            renderizarItensForm();
+            atualizarPreview();
+            switchTab('nova-os');
+        }
+
+        function filtrarOS() {
+            const q = document.getElementById('search-os').value.toLowerCase();
+            const statusFilter = document.getElementById('filter-status-os').value;
+            const rows = document.querySelectorAll('#tabela-lista-os tr');
+            
+            rows.forEach(r => {
+                if (r.classList.contains('empty-row')) return;
+                const text = r.innerText.toLowerCase();
+                const osStatus = r.getAttribute('data-status') || '';
+                
+                const matchesQuery = text.includes(q);
+                const matchesStatus = (statusFilter === 'todos' || osStatus === statusFilter);
+
+                if (matchesQuery && matchesStatus) {
+                    r.style.display = '';
+                } else {
+                    r.style.display = 'none';
+                }
+            });
+        }
+
+        function atualizarSelectClientes() {
+            const sel = document.getElementById('form-select-cliente');
+            sel.innerHTML = '<option value="">-- Selecionar Cliente Salvo --</option>';
+            db.clientes.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c.id;
+                opt.innerText = `${c.nome} ${c.doc ? ' - ' + c.doc : ''}`;
+                sel.appendChild(opt);
+            });
+        }
+
+        function carregarClienteSelecionado() {
+            const id = document.getElementById('form-select-cliente').value;
+            const c = db.clientes.find(item => item.id == id);
+            if (c) {
+                document.getElementById('form-cliente-nome').value = c.nome;
+                document.getElementById('form-cliente-contato').value = c.contato || '';
+                atualizarPreview();
+            }
+        }
+
+        function renderizarTabelaClientes() {
+            const tbody = document.getElementById('tabela-clientes');
+            tbody.innerHTML = '';
+
+            if (db.clientes.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-slate-400">Nenhum cliente cadastrado ainda.</td></tr>`;
+                return;
+            }
+
+            const agora = new Date();
+            const mesAtual = agora.getMonth();
+            const anoAtual = agora.getFullYear();
+
+            db.clientes.forEach(c => {
+                let totalMesCliente = 0;
+                let aReceberCliente = 0;
+
+                if (db.ordensServico && db.ordensServico.length > 0) {
+                    db.ordensServico.forEach(os => {
+                        if (os.clienteNome && os.clienteNome.trim().toLowerCase() === c.nome.trim().toLowerCase()) {
+                            let dataOS = null;
+                            if (os.dataHoraISO) {
+                                dataOS = new Date(os.dataHoraISO);
+                            } else if (os.vencimento) {
+                                const p = os.vencimento.split('-');
+                                if (p.length === 3) dataOS = new Date(p[0], p[1] - 1, p[2]);
+                            }
+                            if (!dataOS || isNaN(dataOS.getTime())) dataOS = agora;
+
+                            const valorOS = Number(os.totalGeral || 0);
+
+                            if (dataOS.getMonth() === mesAtual && dataOS.getFullYear() === anoAtual) {
+                                totalMesCliente += valorOS;
+                            }
+
+                            if (os.status === 'a_receber' || !os.status) {
+                                aReceberCliente += valorOS;
+                            }
+                        }
+                    });
+                }
+
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 dark:hover:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800";
+                tr.innerHTML = `
+                    <td class="p-3">
+                        <div class="font-semibold text-slate-800 dark:text-slate-200">${c.nome}</div>
+                        <div class="text-[10px] text-slate-400">${c.doc || 'Sem CPF/CNPJ'}</div>
+                    </td>
+                    <td class="p-3">
+                        <div class="text-xs text-slate-700 dark:text-slate-300">${c.contato || '-'}</div>
+                        <div class="text-[10px] text-slate-400">${c.telefone || '-'}</div>
+                    </td>
+                    <td class="p-3 text-right font-bold text-emerald-600">
+                        R$ ${totalMesCliente.toLocaleString('pt-BR', {minimumFractionDigits: 2})}
+                    </td>
+                    <td class="p-3 text-right font-bold text-amber-600">
+                        R$ ${aReceberCliente.toLocaleString('pt-BR', {minimumFractionDigits: 2})}
+                    </td>
+                    <td class="p-3 text-center space-x-1">
+                        <button onclick="abrirRelatorioFechamento(${c.id})" class="px-2 py-1 bg-emerald-100 hover:bg-emerald-200 text-xs rounded text-emerald-800 font-bold transition" title="Relatório de Fechamento em Aberto">
+                            <i class="fa-solid fa-file-invoice-dollar"></i> Relatório PDF
+                        </button>
+                        <button onclick="editarCliente(${c.id})" class="px-2 py-1 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-xs rounded text-slate-700 dark:text-slate-300">Editar</button>
+                        <button onclick="deletarCliente(${c.id})" class="px-2 py-1 bg-red-100 hover:bg-red-200 text-xs rounded text-red-600">Excluir</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // --- FUNÇÕES DO RELATÓRIO DE FECHAMENTO EM ABERTO ---
+        function abrirRelatorioFechamento(clienteId) {
+            const cliente = db.clientes.find(c => c.id == clienteId);
+            if (!cliente) return;
+
+            document.getElementById('rel-view-logo').src = currentLogoBase64;
+            document.getElementById('rel-view-cnpj').innerText = "CNPJ: " + (db.empresa.cnpj || "54.740.416/0001-75");
+            document.getElementById('rel-view-endereco').innerText = db.empresa.endereco || "";
+            document.getElementById('rel-view-data-geracao').innerText = "Emitido em: " + obterDataHoraAtual();
+
+            document.getElementById('rel-view-cliente-nome').innerText = cliente.nome;
+            document.getElementById('rel-view-cliente-contato').innerText = (cliente.contato || '-') + ' / ' + (cliente.telefone || '-');
+
+            document.getElementById('rel-footer-email').innerText = db.empresa.email || "tiago.mota.arte@outlook.com";
+            document.getElementById('rel-footer-whatsapp').innerText = db.empresa.whatsapp || "(11) 99883-5362";
+            document.getElementById('rel-footer-pix').innerText = db.empresa.pix || "tiago.mota.arte@outlook.com";
+
+            const tbody = document.getElementById('rel-tabela-itens');
+            tbody.innerHTML = '';
+
+            let totalGeralAberto = 0;
+            let qtdPendencias = 0;
+
+            if (db.ordensServico && db.ordensServico.length > 0) {
+                db.ordensServico.forEach(os => {
+                    if (os.clienteNome && os.clienteNome.trim().toLowerCase() === cliente.nome.trim().toLowerCase()) {
+                        const status = os.status || 'a_receber';
+                        if (status === 'a_receber') {
+                            const valOS = Number(os.totalGeral || 0);
+                            totalGeralAberto += valOS;
+                            qtdPendencias++;
+
+                            const tr = document.createElement('tr');
+                            tr.innerHTML = `
+                                <td class="py-2.5 px-3 font-bold text-slate-800">#${os.id}</td>
+                                <td class="py-2.5 px-3 text-slate-700">${os.titulo || os.descricao || 'Serviço'}</td>
+                                <td class="py-2.5 px-3 text-slate-600">${os.vencimento ? formatarDataExtenso(os.vencimento).split(' de ').slice(0,2).join('/') : '-'}</td>
+                                <td class="py-2.5 px-3 text-right font-black text-amber-700">R$ ${valOS.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                            `;
+                            tbody.appendChild(tr);
+                        }
+                    }
+                });
+            }
+
+            if (qtdPendencias === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-slate-400 font-medium">Nenhum valor em aberto para este cliente (Tudo quitado!).</td></tr>`;
+            }
+
+            document.getElementById('rel-view-total-geral').innerText = `R$ ${totalGeralAberto.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+
+            document.getElementById('modal-relatorio-fechamento').classList.remove('hidden');
+        }
+
+        function fecharModalRelatorio() {
+            document.getElementById('modal-relatorio-fechamento').classList.add('hidden');
+        }
+
+        function imprimirRelatorioFechamento() {
+            window.print();
+        }
+
+        function salvarCliente() {
+            const id = document.getElementById('cliente-id').value;
+            const nome = document.getElementById('crud-cliente-nome').value;
+            const doc = document.getElementById('crud-cliente-doc').value;
+            const telefone = document.getElementById('crud-cliente-telefone').value;
+            const contato = document.getElementById('crud-cliente-contato').value;
+            const cep = document.getElementById('crud-cliente-cep').value;
+            const endereco = document.getElementById('crud-cliente-endereco').value;
+            const numero = document.getElementById('crud-cliente-numero').value;
+            const complemento = document.getElementById('crud-cliente-complemento').value;
+            const bairro = document.getElementById('crud-cliente-bairro').value;
+            const cidade = document.getElementById('crud-cliente-cidade').value;
+            const estado = document.getElementById('crud-cliente-estado').value;
+
+            if (!nome) {
+                alert("Por favor, preencha pelo menos o Nome do cliente.");
+                return;
+            }
+
+            const clienteData = {
+                id: id ? parseInt(id) : Date.now(),
+                nome, doc, telefone, contato, cep, endereco, numero, complemento, bairro, cidade, estado
+            };
+
+            if (id) {
+                const idx = db.clientes.findIndex(c => c.id == id);
+                if (idx >= 0) db.clientes[idx] = clienteData;
+            } else {
+                db.clientes.push(clienteData);
+            }
+
+            salvarDB();
+            limparFormCliente();
+            renderizarTabelaClientes();
+            atualizarSelectClientes();
+            alert("Cliente salvo com sucesso!");
+        }
+
+        function editarCliente(id) {
+            const c = db.clientes.find(item => item.id == id);
+            if (!c) return;
+            document.getElementById('cliente-id').value = c.id;
+            document.getElementById('crud-cliente-nome').value = c.nome || '';
+            document.getElementById('crud-cliente-doc').value = c.doc || '';
+            document.getElementById('crud-cliente-telefone').value = c.telefone || '';
+            document.getElementById('crud-cliente-contato').value = c.contato || '';
+            document.getElementById('crud-cliente-cep').value = c.cep || '';
+            document.getElementById('crud-cliente-endereco').value = c.endereco || '';
+            document.getElementById('crud-cliente-numero').value = c.numero || '';
+            document.getElementById('crud-cliente-complemento').value = c.complemento || '';
+            document.getElementById('crud-cliente-bairro').value = c.bairro || '';
+            document.getElementById('crud-cliente-cidade').value = c.cidade || '';
+            document.getElementById('crud-cliente-estado').value = c.estado || '';
+            
+            document.getElementById('cliente-form-title').innerText = "Editar Cliente";
+        }
+
+        function deletarCliente(id) {
+            if (confirm("Deseja realmente excluir este cliente?")) {
+                db.clientes = db.clientes.filter(c => c.id != id);
+                salvarDB();
+                renderizarTabelaClientes();
+                atualizarSelectClientes();
+            }
+        }
+
+        function limparFormCliente() {
+            document.getElementById('cliente-id').value = '';
+            document.getElementById('crud-cliente-nome').value = '';
+            document.getElementById('crud-cliente-doc').value = '';
+            document.getElementById('crud-cliente-telefone').value = '';
+            document.getElementById('crud-cliente-contato').value = '';
+            document.getElementById('crud-cliente-cep').value = '';
+            document.getElementById('crud-cliente-endereco').value = '';
+            document.getElementById('crud-cliente-numero').value = '';
+            document.getElementById('crud-cliente-complemento').value = '';
+            document.getElementById('crud-cliente-bairro').value = '';
+            document.getElementById('crud-cliente-cidade').value = '';
+            document.getElementById('crud-cliente-estado').value = '';
+            
+            document.getElementById('cliente-form-title').innerText = "Cadastro de Cliente";
+        }
+
+        function salvarConfiguracoes() {
+            db.empresa.cnpj = document.getElementById('cfg-cnpj').value;
+            db.empresa.endereco = document.getElementById('cfg-endereco').value;
+            db.empresa.email = document.getElementById('cfg-email').value;
+            db.empresa.whatsapp = document.getElementById('cfg-whatsapp').value;
+            db.empresa.pix = document.getElementById('cfg-pix').value;
+
+            salvarDB();
+            atualizarPreview();
+            alert("Configurações salvas com sucesso!");
+        }
+
+        function fazerBackupOS() {
+            try {
+                const dadosStr = localStorage.getItem('os_system_db');
+                if (!dadosStr) {
+                    alert("Não há dados salvos para exportar.");
+                    return;
+                }
+
+                const blob = new Blob([dadosStr], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                
+                const dataHoje = new Date().toISOString().slice(0, 10);
+                a.href = url;
+                a.download = `backup_sistema_os_tiagomota_${dataHoje}.json`;
+                
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            } catch (erro) {
+                alert('Erro ao gerar o arquivo de backup: ' + erro.message);
+            }
+        }
+
+        function restaurarBackupOS(evento) {
+            const arquivo = evento.target.files[0];
+            if (!arquivo) return;
+
+            if (!confirm('Atenção, Tiago! Restaurar um backup substituirá todos os dados atuais na tela. Deseja continuar?')) {
+                evento.target.value = '';
+                return;
+            }
+
+            const leitor = new FileReader();
+            leitor.onload = function(e) {
+                try {
+                    const conteudo = e.target.result;
+                    JSON.parse(conteudo);
+
+                    localStorage.setItem('os_system_db', conteudo);
+                    alert('Backup restaurado com sucesso! O sistema será atualizado.');
+                    location.reload();
+                } catch (erro) {
+                    alert('Erro ao ler o arquivo. Certifique-se de que é um arquivo JSON de backup válido.');
+                }
+            };
+            leitor.readAsText(arquivo);
+        }
+    </script>
+</body>
+</html>
